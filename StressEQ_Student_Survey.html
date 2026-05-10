@@ -1,0 +1,1720 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>StressEQ — Student Survey</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+    :root {
+      --primary: #2B6CB0;
+      --primary-dark: #1A4F8A;
+      --accent: #38B2AC;
+      --bg-grad-1: #EBF8FF;
+      --bg-grad-2: #E6FFFA;
+      --text: #2D3748;
+      --muted: #718096;
+      --card: #FFFFFF;
+      --border: #E2E8F0;
+      --soft: #F7FAFC;
+      --warn: #F6AD55;
+      --ok: #48BB78;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: linear-gradient(135deg, var(--bg-grad-1), var(--bg-grad-2));
+      min-height: 100vh;
+      color: var(--text);
+      line-height: 1.6;
+      padding: 24px 16px 48px;
+    }
+
+    .shell {
+      max-width: 760px;
+      margin: 0 auto;
+    }
+
+    /* Header */
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 18px;
+    }
+
+    .brand {
+      font-weight: 700;
+      color: var(--primary);
+      font-size: 1.08em;
+      letter-spacing: -0.3px;
+    }
+
+    .brand .dot {
+      color: var(--accent);
+    }
+
+    .save-state {
+      font-size: 0.78em;
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    /* Progress bar */
+    .progress-wrap {
+      background: rgba(255, 255, 255, 0.55);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.8);
+      border-radius: 100px;
+      height: 10px;
+      overflow: hidden;
+      margin-bottom: 22px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    }
+
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary), var(--accent));
+      width: 0%;
+      border-radius: 100px;
+      transition: width 0.5s cubic-bezier(.4, 0, .2, 1);
+    }
+
+    /* Card */
+    .card {
+      background: var(--card);
+      border-radius: 18px;
+      box-shadow: 0 8px 32px rgba(43, 108, 176, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04);
+      padding: 36px 38px;
+      border: 1px solid rgba(255, 255, 255, 0.9);
+      animation: fadeIn 0.5s ease;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(12px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Step badge */
+    .step-badge {
+      display: inline-block;
+      background: var(--soft);
+      color: var(--primary);
+      font-size: 0.72em;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 5px 10px;
+      border-radius: 6px;
+      margin-bottom: 14px;
+    }
+
+    h1 {
+      font-size: 1.65em;
+      font-weight: 700;
+      color: var(--primary);
+      line-height: 1.25;
+      letter-spacing: -0.5px;
+      margin-bottom: 6px;
+    }
+
+    h2 {
+      font-size: 1.32em;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 4px;
+      letter-spacing: -0.3px;
+    }
+
+    h3 {
+      font-size: 1.0em;
+      font-weight: 600;
+      color: var(--text);
+      margin: 14px 0 4px;
+    }
+
+    .lead {
+      color: var(--muted);
+      font-size: 0.95em;
+      margin-bottom: 22px;
+    }
+
+    /* Question */
+    .question {
+      margin-top: 22px;
+      padding-bottom: 4px;
+    }
+
+    .q-label {
+      display: block;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 10px;
+      font-size: 0.97em;
+    }
+
+    .q-label .qnum {
+      color: var(--accent);
+      font-weight: 700;
+      margin-right: 4px;
+    }
+
+    .hint {
+      font-size: 0.85em;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    /* Text / number input */
+    input[type="text"],
+    input[type="number"],
+    select,
+    textarea {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      font-family: inherit;
+      font-size: 0.97em;
+      color: var(--text);
+      background: white;
+      transition: border 0.15s, box-shadow 0.15s;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(43, 108, 176, 0.1);
+    }
+
+    /* Radio cards (for gender, race, etc.) */
+    .radio-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .radio-card {
+      flex: 1 1 auto;
+      min-width: 140px;
+    }
+
+    .radio-card input {
+      display: none;
+    }
+
+    .radio-card label {
+      display: block;
+      padding: 11px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.15s;
+      font-size: 0.92em;
+      font-weight: 500;
+      user-select: none;
+    }
+
+    .radio-card label:hover {
+      border-color: var(--primary);
+      background: var(--soft);
+    }
+
+    .radio-card input:checked+label {
+      border-color: var(--primary);
+      background: var(--primary);
+      color: white;
+      font-weight: 600;
+    }
+
+    /* Likert 1-7 scale */
+    .likert {
+      display: flex;
+      gap: 6px;
+      margin-top: 6px;
+    }
+
+    .likert-item {
+      flex: 1;
+      text-align: center;
+    }
+
+    .likert-item input {
+      display: none;
+    }
+
+    .likert-item label {
+      display: block;
+      padding: 14px 6px;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 600;
+      color: var(--muted);
+      transition: all 0.15s;
+      font-size: 0.95em;
+    }
+
+    .likert-item label:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+
+    .likert-item input:checked+label {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 10px rgba(43, 108, 176, 0.25);
+    }
+
+    .likert-anchors {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.78em;
+      color: var(--muted);
+      margin-top: 6px;
+      padding: 0 4px;
+    }
+
+    /* PHQ/GAD 0-3 scale */
+    .freq4 {
+      display: flex;
+      gap: 6px;
+      margin-top: 6px;
+    }
+
+    .freq4-item {
+      flex: 1;
+    }
+
+    .freq4-item input {
+      display: none;
+    }
+
+    .freq4-item label {
+      display: block;
+      padding: 12px 8px;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      cursor: pointer;
+      text-align: center;
+      font-size: 0.85em;
+      font-weight: 500;
+      color: var(--text);
+      transition: all 0.15s;
+      line-height: 1.3;
+    }
+
+    .freq4-item label:hover {
+      border-color: var(--primary);
+    }
+
+    .freq4-item input:checked+label {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+      font-weight: 600;
+    }
+
+    /* Checkbox grid (chronic illness, top features) */
+    .check-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 8px;
+      margin-top: 6px;
+    }
+
+    .check-item input {
+      display: none;
+    }
+
+    .check-item label {
+      display: block;
+      padding: 11px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 0.9em;
+      font-weight: 500;
+      color: var(--text);
+      transition: all 0.15s;
+      user-select: none;
+    }
+
+    .check-item label:hover {
+      border-color: var(--primary);
+      background: var(--soft);
+    }
+
+    .check-item input:checked+label {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+      font-weight: 600;
+    }
+
+    .check-tier {
+      font-size: 0.72em;
+      color: var(--muted);
+      margin: 12px 0 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-weight: 600;
+    }
+
+    .row-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    /* Buttons */
+    .button-row {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 32px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
+      gap: 12px;
+    }
+
+    button {
+      font-family: inherit;
+      font-size: 0.95em;
+      font-weight: 600;
+      padding: 12px 28px;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      transition: all 0.15s;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+      box-shadow: 0 4px 14px rgba(43, 108, 176, 0.3);
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-dark);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 18px rgba(43, 108, 176, 0.35);
+    }
+
+    .btn-primary:disabled {
+      background: #CBD5E0;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .btn-secondary {
+      background: white;
+      color: var(--primary);
+      border: 1.5px solid var(--border);
+    }
+
+    .btn-secondary:hover {
+      background: var(--soft);
+      border-color: var(--primary);
+    }
+
+    /* Callouts */
+    .callout {
+      background: linear-gradient(135deg, #EBF8FF, #E6FFFA);
+      border: 1px solid #BEE3F8;
+      border-radius: 12px;
+      padding: 14px 18px;
+      margin: 18px 0;
+      font-size: 0.92em;
+      color: #2C5282;
+    }
+
+    .callout strong {
+      color: #1A4F8A;
+    }
+
+    .crisis-warn {
+      background: #FFF5F5;
+      border: 1px solid #FEB2B2;
+      color: #742A2A;
+      border-radius: 12px;
+      padding: 14px 18px;
+      margin: 14px 0;
+      font-size: 0.88em;
+      display: none;
+    }
+
+    .crisis-warn.show {
+      display: block;
+    }
+
+    /* Cover & success cards */
+    .cover-emoji {
+      font-size: 3em;
+      margin-bottom: 8px;
+      line-height: 1;
+    }
+
+    .cover-meta {
+      display: flex;
+      gap: 22px;
+      flex-wrap: wrap;
+      margin: 22px 0;
+    }
+
+    .cover-meta-item {
+      display: flex;
+      flex-direction: column;
+      background: var(--soft);
+      padding: 12px 18px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      flex: 1 1 140px;
+    }
+
+    .cover-meta-item .num {
+      font-size: 1.45em;
+      font-weight: 700;
+      color: var(--primary);
+      line-height: 1.2;
+    }
+
+    .cover-meta-item .lbl {
+      font-size: 0.78em;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-weight: 600;
+    }
+
+    .success-icon {
+      font-size: 4em;
+      text-align: center;
+      margin-bottom: 12px;
+    }
+
+    .success-stats {
+      background: var(--soft);
+      border-radius: 12px;
+      padding: 18px;
+      margin: 22px 0;
+      text-align: center;
+    }
+
+    .success-stats .big {
+      font-size: 2em;
+      font-weight: 700;
+      color: var(--primary);
+      line-height: 1.1;
+    }
+
+    .success-stats .label {
+      color: var(--muted);
+      font-size: 0.88em;
+      margin-top: 4px;
+    }
+
+    /* Tag (for top-3 picker max) */
+    .picker-counter {
+      font-size: 0.85em;
+      color: var(--accent);
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    /* Section divider */
+    .section-divider {
+      border: none;
+      border-top: 1px dashed var(--border);
+      margin: 26px 0 18px;
+    }
+
+    /* Unit toggle (cm/ft, kg/lb) */
+    .unit-toggle {
+      float: right;
+      display: inline-flex;
+      background: var(--soft);
+      border-radius: 8px;
+      padding: 2px;
+      margin-left: 8px;
+    }
+
+    .unit-btn {
+      background: transparent;
+      border: none;
+      padding: 4px 12px;
+      font-size: 0.78em;
+      font-weight: 600;
+      color: var(--muted);
+      border-radius: 6px;
+      cursor: pointer;
+      box-shadow: none;
+    }
+
+    .unit-btn.active {
+      background: var(--primary);
+      color: white;
+    }
+
+    .unit-btn:hover:not(.active) {
+      color: var(--primary);
+    }
+
+    /* Live BMI feedback */
+    .bmi-live {
+      margin-top: 14px;
+      padding: 14px 18px;
+      background: linear-gradient(135deg, #EBF8FF, #E6FFFA);
+      border: 1px solid #BEE3F8;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    .bmi-label {
+      font-size: 0.82em;
+      color: var(--muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .bmi-value {
+      font-size: 1.6em;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    .bmi-cat {
+      font-size: 0.88em;
+      color: var(--text);
+      font-weight: 500;
+      padding: 4px 10px;
+      border-radius: 6px;
+      background: white;
+      border: 1px solid var(--border);
+    }
+
+    /* Hidden steps */
+    .step {
+      display: none;
+    }
+
+    .step.active {
+      display: block;
+    }
+
+    /* Mobile */
+    @media (max-width: 600px) {
+      body {
+        padding: 12px 10px 36px;
+      }
+
+      .card {
+        padding: 20px 18px;
+      }
+
+      h1 {
+        font-size: 1.25em;
+      }
+
+      .row-2 {
+        grid-template-columns: 1fr;
+      }
+
+      .likert-item label {
+        padding: 12px 4px;
+        font-size: 0.88em;
+      }
+
+      .freq4-item label {
+        font-size: 0.78em;
+        padding: 10px 4px;
+      }
+
+      .radio-card {
+        min-width: 100%;
+      }
+
+      /* Cover page compact on mobile */
+      .cover-meta {
+        gap: 10px;
+      }
+
+      .cover-meta-item {
+        padding: 8px 12px;
+      }
+
+      .cover-meta-item .num {
+        font-size: 1.1em;
+      }
+
+      /* Full-width Let's go button on mobile */
+      .cover-start-btn {
+        width: 100%;
+        margin-top: 6px;
+      }
+
+      .cover-start-row {
+        flex-direction: column;
+        align-items: stretch;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="brand">StressEQ <span class="dot">●</span> Student Survey</div>
+      <div class="save-state" id="saveState">Auto-saved</div>
+    </div>
+
+    <div class="progress-wrap">
+      <div class="progress-bar" id="progressBar"></div>
+    </div>
+
+    <form id="surveyForm">
+
+      <!-- ===================== STEP 0: COVER ===================== -->
+      <section class="step active" data-step="0">
+        <div class="card">
+          <h1>Academic Stress Assessment<br /><span style="font-size:0.55em; font-weight:500; color:var(--muted); letter-spacing:0;">Helping us understand student wellbeing at our university</span></h1>
+          <p class="lead" style="font-size:1.0em; color:var(--text); margin-top:14px; line-height:1.5;">
+            <strong>StressEQ</strong> is our Final Year Project — an AI system that monitors and forecasts student stress.
+            It lets you run <strong>Scenario-Based Analysis</strong> (e.g. "What if I sleep more?"), delivers
+            <strong>personalised recommendations</strong>, and includes an <strong>AI Coach</strong> based on clinical research.
+          </p>
+
+          <p style="margin: 12px 0 8px; color: var(--text); font-size:0.95em; line-height:1.4;">
+            To validate StressEQ on our university population, we need real student data to strengthen our scientific study. That's where you come in.
+          </p>
+
+          <div class="cover-meta" style="margin-top:14px;">
+            <div class="cover-meta-item"><span class="num">~6 min</span><span class="lbl">Quick</span></div>
+            <div class="cover-meta-item"><span class="num">Anonymous</span><span class="lbl">No name, no device</span></div>
+            <div class="cover-meta-item"><span class="num">Confidential</span><span class="lbl">Random ID only</span></div>
+          </div>
+          <p style="font-size:0.8em; color:var(--muted); margin: 8px 0 16px;">
+            <span style="color:var(--primary); font-weight:600;">&#9679; Student Survey</span>
+            &ensp;|&ensp;
+            <span style="font-weight:500;">Faculty &amp; Staff Survey</span>
+          </p>
+
+          <p style="color: var(--muted); font-size:0.92em; margin: 18px 0;">
+            A few questions ask how you've been feeling lately — these come from established wellbeing screeners. You
+            can skip anything that feels heavy. Your responses go into our research database under a random ID, not
+            your name or email. You'd be helping us defend our FYP — and (hopefully) graduate. 🎓
+          </p>
+
+          <div class="callout">
+            <strong>Heads up:</strong> A few questions are drawn from the PHQ-9 and GAD-7 — internationally
+            validated clinical screeners. These are standard research instruments, not a diagnosis. Your responses
+            are stored under a randomly generated ID, with no link to your name or email.
+          </div>
+
+          <div class="button-row cover-start-row" style="border-top:none; padding-top:8px;">
+            <span style="color:var(--muted); font-size:0.82em; align-self:center;">~6 minutes &nbsp;·&nbsp; anonymous</span>
+            <button type="button" class="btn-primary cover-start-btn" onclick="nextStep()">Let's go →</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================== STEP 1: BASICS ===================== -->
+      <section class="step" data-step="1">
+        <div class="card">
+          <span class="step-badge">Section 1 of 9 · Basics</span>
+          <h2>First, the basics</h2>
+          <p class="lead">No identifying info — just rough demographics so we can compare across groups.</p>
+
+          <div class="question">
+            <label class="q-label"><span class="qnum">Q1.</span> What is your age?</label>
+            <input type="number" name="age" min="16" max="60" placeholder="e.g., 21" required />
+          </div>
+
+          <div class="question">
+            <label class="q-label"><span class="qnum">Q2.</span> Gender</label>
+            <div class="radio-group">
+              <div class="radio-card"><input type="radio" id="g1" name="gender" value="Female" required /><label
+                  for="g1">Female</label></div>
+              <div class="radio-card"><input type="radio" id="g2" name="gender" value="Male" /><label
+                  for="g2">Male</label></div>
+              <div class="radio-card"><input type="radio" id="g3" name="gender" value="Other" /><label for="g3">Other /
+                  Prefer not to say</label></div>
+            </div>
+          </div>
+
+          <div class="question">
+            <label class="q-label"><span class="qnum">Q3.</span> Are you an international student?</label>
+            <div class="radio-group">
+              <div class="radio-card"><input type="radio" id="intl1" name="is_international" value="Yes"
+                  required /><label for="intl1">Yes</label></div>
+              <div class="radio-card"><input type="radio" id="intl2" name="is_international" value="No" /><label
+                  for="intl2">No</label></div>
+            </div>
+          </div>
+
+          <div class="question">
+            <label class="q-label"><span class="qnum">Q4.</span> Race / ethnicity</label>
+            <div class="radio-group">
+              <div class="radio-card"><input type="radio" id="r1" name="race" value="Hispanic" required /><label
+                  for="r1">Hispanic / Latino</label></div>
+              <div class="radio-card"><input type="radio" id="r2" name="race" value="Black" /><label for="r2">Black /
+                  African</label></div>
+              <div class="radio-card"><input type="radio" id="r3" name="race" value="Asian" /><label
+                  for="r3">Asian</label></div>
+              <div class="radio-card"><input type="radio" id="r4" name="race" value="White" /><label
+                  for="r4">White</label></div>
+              <div class="radio-card"><input type="radio" id="r5" name="race" value="Other" /><label for="r5">Other /
+                  Mixed</label></div>
+            </div>
+          </div>
+
+          <div class="row-2">
+            <div class="question">
+              <label class="q-label"><span class="qnum">Q5.</span> Education level</label>
+              <select name="education_level" required>
+                <option value="">— select —</option>
+                <option>Bachelor's Year 1</option>
+                <option>Bachelor's Year 2</option>
+                <option>Bachelor's Year 3</option>
+                <option>Bachelor's Year 4</option>
+                <option>Master's</option>
+                <option>PhD</option>
+              </select>
+            </div>
+            <div class="question">
+              <label class="q-label"><span class="qnum">Q6.</span> Field of study</label>
+              <select name="field_of_study" required>
+                <option value="">— select —</option>
+                <option>Engineering / Computing</option>
+                <option>Medicine / Health Sciences</option>
+                <option>Business / Economics</option>
+                <option>Arts / Humanities</option>
+                <option>Natural Sciences</option>
+                <option>Social Sciences</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="button-row">
+            <button type="button" class="btn-secondary" onclick="prevStep()">← Back</button>
+            <button type="button" class="btn-primary" onclick="nextStep()">Next →</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================== STEP 2: ACADEMIC ===================== -->
+      <section class="step" data-step="2">
+        <div class="card">
+          <span class="step-badge">Section 2 of 9 · Academic life</span>
+          <h2>Your studies 📚</h2>
+          <p class="lead">How's the academic side going lately?</p>
+
+          <div class="question">
+            <label class="q-label"><span class="qnum">Q7.</span> What's your current GPA? <span class="hint">(0.00–4.00
+                scale)</span></label>
+            <input type="number" name="gpa" step="0.01" min="0" max="4" placeholder="e.g., 3.45" required />
+          </div>
+
+          <div class="question">
+            <label class="q-label"><span class="qnum">Q8.</span> Over the past 4 weeks, my academic load has
+              felt:</label>
+            <div class="likert">
+              <div class="likert-item"><input type="radio" id="ap1" name="academic_pressure" value="1" required /><label
+                  for="ap1">1</label></div>
+              <div class="likert-item"><input type="radio" id="ap2" name="academic_pressure" value="2" /><label
+                  for="ap2">2</label></div>
+              <div class="likert-item"><input type="radio" id="ap3" name="academic_pressure" value="3" /><label
+                  for="ap3">3</label></div>
+              <div class="likert-item"><input type="radio" id="ap4" name="academic_pressure" value="4" /><label
+                  for="ap4">4</label></div>
+              <div class="likert-item"><input type="radio" id="ap5" name="academic_pressure" value="5" /><label
+                  for="ap5">5</label></div>
+              <div class="likert-item"><input type="radio" id="ap6" name="academic_pressure" value="6" /><label
+                  for="ap6">6</label></div>
+              <div class="likert-item"><input type="radio" id="ap7" name="academic_pressure" value="7" /><label
+                  for="ap7">7</label></div>
+            </div>
+            <div class="likert-anchors"><span>Not at all overwhelming</span><span>Extremely overwhelming</span></div>
+          </div>
+
+          <div class="question">
+            <label class="q-label"><span class="qnum">Q9.</span> Hours per week studying outside class</label>
+            <div class="radio-group">
+              <div class="radio-card"><input type="radio" id="sh1" name="study_hours" value="0-5" required /><label
+                  for="sh1">0–5</label></div>
+              <div class="radio-card"><input type="radio" id="sh2" name="study_hours" value="6-10" /><label
+                  for="sh2">6–10</label></div>
+              <div class="radio-card"><input type="radio" id="sh3" name="study_hours" value="11-20" /><label
+                  for="sh3">11–20</label></div>
+              <div class="radio-card"><input type="radio" id="sh4" name="study_hours" value="21-30" /><label
+                  for="sh4">21–30</label></div>
+              <div class="radio-card"><input type="radio" id="sh5" name="study_hours" value="31+" /><label
+                  for="sh5">31+</label></div>
+            </div>
+          </div>
+
+          <div class="button-row">
+            <button type="button" class="btn-secondary" onclick="prevStep()">← Back</button>
+            <button type="button" class="btn-primary" onclick="nextStep()">Next →</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================== STEP 3: SLEEP & BODY ===================== -->
+      <section class="step" data-step="3">
+        <div class="card">
+          <span class="step-badge">Section 3 of 9 · Sleep &amp; body</span>
+          <h2>How are you sleeping? 😴</h2>
+          <p class="lead">Sleep + activity are huge stress predictors. Be honest — no judgment.</p>
+
+          <div class="question">
+            <label class="q-label"><span class="qnum">Q10.</span> On average over the past 4 weeks, hours of sleep per
+              night</label>
+            <input type="number" name="sleep_hours" step="0.5" min="0" max="14" placeholder="e.g., 6.5" required />
+          </div>
+
+          <div class="question">
+            <label class="q-label"><span class="qnum">Q11.</span> In the past 7 days, on how many mornings did you wake
+              up
+              feeling refreshed (not tired)?</label>
+            <div class="likert" id="rsGroup"></div>
+          </div>
+
+          <div class="question">
+            <label class="q-label"><span class="qnum">Q12.</span> Days in the past week with ≥30 min of
+              moderate-to-vigorous physical activity</label>
+            <div class="likert" id="paGroup"></div>
+          </div>
+
+          <div class="question">
+            <label class="q-label"><span class="qnum">Q13.</span> Your height
+              <span class="unit-toggle">
+                <button type="button" class="unit-btn active" data-unit="cm" data-target="height">cm</button>
+                <button type="button" class="unit-btn" data-unit="ft" data-target="height">ft / in</button>
+              </span>
+            </label>
+            <div id="height-cm-input">
+              <input type="number" name="height_cm" min="100" max="230" placeholder="e.g., 170" />
+            </div>
+            <div id="height-ft-input" style="display:none;">
+              <div class="row-2">
+                <input type="number" name="height_ft" min="3" max="7" placeholder="ft (e.g., 5)" />
+                <input type="number" name="height_in" min="0" max="11" placeholder="in (e.g., 7)" />
+              </div>
+            </div>
+          </div>
+
+          <div class="question">
+            <label class="q-label"><span class="qnum">Q14.</span> Your weight
+              <span class="unit-toggle">
+                <button type="button" class="unit-btn active" data-unit="kg" data-target="weight">kg</button>
+                <button type="button" class="unit-btn" data-unit="lb" data-target="weight">lbs</button>
+              </span>
+            </label>
+            <div id="weight-kg-input">
+              <input type="number" name="weight_kg" min="30" max="200" placeholder="e.g., 65" />
+            </div>
+            <div id="weight-lb-input" style="display:none;">
+              <input type="number" name="weight_lb" min="65" max="450" placeholder="e.g., 145" />
+            </div>
+          </div>
+
+          <div id="bmiLive" class="bmi-live" style="display:none;">
+            <span class="bmi-label">Your BMI</span>
+            <span class="bmi-value" id="bmiValue">—</span>
+            <span class="bmi-cat" id="bmiCat"></span>
+          </div>
+
+          <div class="button-row">
+            <button type="button" class="btn-secondary" onclick="prevStep()">← Back</button>
+            <button type="button" class="btn-primary" onclick="nextStep()">Next →</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================== STEP 4: SUBSTANCE USE ===================== -->
+      <section class="step" data-step="4">
+        <div class="card">
+          <span class="step-badge">Section 4 of 9 · Lifestyle</span>
+          <h2>Your habits 🌿</h2>
+          <p class="lead">Past 30 days. Your answers are anonymous — we just want patterns, not personal details.</p>
+
+          <div class="question">
+            <label class="q-label"><span class="qnum">Q15.</span> How often did you use tobacco / nicotine (cigarettes,
+              vape, pouches, etc.)?</label>
+            <div class="radio-group">
+              <div class="radio-card"><input type="radio" id="tob1" name="tobacco" value="Never" required /><label
+                  for="tob1">Never</label></div>
+              <div class="radio-card"><input type="radio" id="tob2" name="tobacco" value="Rarely" /><label
+                  for="tob2">Rarely (1–2 days)</label></div>
+              <div class="radio-card"><input type="radio" id="tob3" name="tobacco" value="Sometimes" /><label
+                  for="tob3">Sometimes (3–9)</label></div>
+              <div class="radio-card"><input type="radio" id="tob4" name="tobacco" value="Often" /><label
+                  for="tob4">Often (10+)</label></div>
+            </div>
+          </div>
+
+          <div class="question">
+            <label class="q-label"><span class="qnum">Q16.</span> How often did you consume alcohol?</label>
+            <div class="radio-group">
+              <div class="radio-card"><input type="radio" id="alc1" name="alcohol" value="Never" required /><label
+                  for="alc1">Never</label></div>
+              <div class="radio-card"><input type="radio" id="alc2" name="alcohol" value="Rarely" /><label
+                  for="alc2">Rarely</label></div>
+              <div class="radio-card"><input type="radio" id="alc3" name="alcohol" value="Sometimes" /><label
+                  for="alc3">Sometimes</label></div>
+              <div class="radio-card"><input type="radio" id="alc4" name="alcohol" value="Often" /><label
+                  for="alc4">Often</label></div>
+            </div>
+          </div>
+
+          <div class="question">
+            <label class="q-label"><span class="qnum">Q17.</span> Did you use any other recreational substance
+              (cannabis, prescription misuse, other)?</label>
+            <div class="radio-group">
+              <div class="radio-card"><input type="radio" id="drg1" name="drugs" value="No" required /><label
+                  for="drg1">No</label></div>
+              <div class="radio-card"><input type="radio" id="drg2" name="drugs" value="Yes" /><label
+                  for="drg2">Yes</label></div>
+            </div>
+          </div>
+
+          <div class="button-row">
+            <button type="button" class="btn-secondary" onclick="prevStep()">← Back</button>
+            <button type="button" class="btn-primary" onclick="nextStep()">Next →</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================== STEP 5: BELONGING & SES ===================== -->
+      <section class="step" data-step="5">
+        <div class="card">
+          <span class="step-badge">Section 5 of 9 · Connection &amp; money</span>
+          <h2>Belonging &amp; finances 🤝</h2>
+          <p class="lead">How you're feeling about your place at uni and your money situation.</p>
+
+          <div class="question">
+            <label class="q-label"><span class="qnum">Q18.</span> "I feel I belong at this university."</label>
+            <div class="likert" id="belongGroup"></div>
+            <div class="likert-anchors"><span>Strongly Disagree</span><span>Strongly Agree</span></div>
+          </div>
+
+          <div class="question">
+            <label class="q-label"><span class="qnum">Q19.</span> Highest education level completed by your parent /
+              guardian</label>
+            <select name="parent_education" required>
+              <option value="">— select —</option>
+              <option>No formal education</option>
+              <option>Primary</option>
+              <option>Secondary</option>
+              <option>Bachelor's</option>
+              <option>Master's</option>
+              <option>PhD / Professional</option>
+            </select>
+          </div>
+
+          <div class="question">
+            <label class="q-label"><span class="qnum">Q20.</span> "I worry about my finances often."</label>
+            <div class="likert" id="finGroup"></div>
+            <div class="likert-anchors"><span>Strongly Disagree</span><span>Strongly Agree</span></div>
+          </div>
+
+          <div class="button-row">
+            <button type="button" class="btn-secondary" onclick="prevStep()">← Back</button>
+            <button type="button" class="btn-primary" onclick="nextStep()">Next →</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================== STEP 6: CHRONIC ILLNESS ===================== -->
+      <section class="step" data-step="6">
+        <div class="card">
+          <span class="step-badge">Section 6 of 9 · Health</span>
+          <h2>Any chronic conditions? 🩺</h2>
+          <p class="lead">Tick anything you currently have a diagnosis for. Tick "None" if not applicable.</p>
+
+          <div class="question">
+            <label class="q-label"><span class="qnum">Q21.</span> Diagnosed chronic condition(s):</label>
+
+            <div class="check-grid">
+              <div class="check-item"><input type="checkbox" id="cn" name="chronic_none" /><label for="cn">None</label>
+              </div>
+            </div>
+
+            <div class="check-tier">Mild tier</div>
+            <div class="check-grid">
+              <div class="check-item"><input type="checkbox" id="cm1" name="chronic_mild" value="Asthma" /><label
+                  for="cm1">Asthma</label></div>
+              <div class="check-item"><input type="checkbox" id="cm2" name="chronic_mild"
+                  value="High cholesterol" /><label for="cm2">High cholesterol</label></div>
+            </div>
+
+            <div class="check-tier">Moderate tier</div>
+            <div class="check-grid">
+              <div class="check-item"><input type="checkbox" id="cmo1" name="chronic_mod" value="Hypertension" /><label
+                  for="cmo1">Hypertension</label></div>
+              <div class="check-item"><input type="checkbox" id="cmo2" name="chronic_mod" value="Thyroid" /><label
+                  for="cmo2">Thyroid disorder</label></div>
+              <div class="check-item"><input type="checkbox" id="cmo3" name="chronic_mod"
+                  value="Gastrointestinal" /><label for="cmo3">Gastrointestinal</label></div>
+              <div class="check-item"><input type="checkbox" id="cmo4" name="chronic_mod" value="Arthritis" /><label
+                  for="cmo4">Arthritis</label></div>
+            </div>
+
+            <div class="check-tier">Severe tier</div>
+            <div class="check-grid">
+              <div class="check-item"><input type="checkbox" id="cs1" name="chronic_sev" value="Diabetes" /><label
+                  for="cs1">Diabetes</label></div>
+              <div class="check-item"><input type="checkbox" id="cs2" name="chronic_sev" value="Sickle cell" /><label
+                  for="cs2">Sickle cell</label></div>
+              <div class="check-item"><input type="checkbox" id="cs3" name="chronic_sev" value="Seizure" /><label
+                  for="cs3">Seizure disorder</label></div>
+              <div class="check-item"><input type="checkbox" id="cs4" name="chronic_sev" value="Cancer" /><label
+                  for="cs4">Cancer</label></div>
+            </div>
+          </div>
+
+          <div class="button-row">
+            <button type="button" class="btn-secondary" onclick="prevStep()">← Back</button>
+            <button type="button" class="btn-primary" onclick="nextStep()">Next →</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================== STEP 7: PHQ-9 ===================== -->
+      <section class="step" data-step="7">
+        <div class="card">
+          <span class="step-badge">Section 7 of 9 · How you've been feeling</span>
+          <h2>The past 2 weeks 💭</h2>
+          <p class="lead">These come from the PHQ-9, a clinical screener used worldwide. Answer how often each statement
+            has applied to you.</p>
+
+          <div class="callout">
+            <strong>Same scale for all 9 items below:</strong><br />
+            <strong>1</strong> Not at all · <strong>2</strong> Several days · <strong>3</strong> More than half the days
+            · <strong>4</strong> Nearly every day
+          </div>
+
+          <div id="phqContainer"></div>
+
+          <div class="crisis-warn" id="crisisWarn">
+            <strong>If you're having thoughts of self-harm</strong>, please reach out — you matter. Talk to someone you
+            trust (a family member, close friend, or a teacher you respect), or call a confidential mental-health
+            helpline in your country. You don't have to go through this alone.
+          </div>
+
+          <div class="button-row">
+            <button type="button" class="btn-secondary" onclick="prevStep()">← Back</button>
+            <button type="button" class="btn-primary" onclick="nextStep()">Next →</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================== STEP 8: GAD-7 ===================== -->
+      <section class="step" data-step="8">
+        <div class="card">
+          <span class="step-badge">Section 8 of 9 · Worry &amp; anxiety</span>
+          <h2>How anxious have you been? 🌊</h2>
+          <p class="lead">7 more items — these come from the GAD-7 anxiety screener. Same response scale as before.</p>
+
+          <div class="callout">
+            <strong>1</strong> Not at all · <strong>2</strong> Several days · <strong>3</strong> More than half the days
+            · <strong>4</strong> Nearly every day
+          </div>
+
+          <div id="gadContainer"></div>
+
+          <div class="button-row">
+            <button type="button" class="btn-secondary" onclick="prevStep()">← Back</button>
+            <button type="button" class="btn-primary" onclick="nextStep()">Next →</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================== STEP 9: FEEDBACK ===================== -->
+      <section class="step" data-step="9">
+        <div class="card">
+          <span class="step-badge">Section 9 of 9 · Help us improve</span>
+          <h2>Last bit — your feedback 🚀</h2>
+          <p class="lead">Tell us what you think before we let you go.</p>
+
+          <div class="question">
+            <label class="q-label"><span class="qnum">Q38.</span> Imagine StressEQ is live as an app on your phone —
+              would
+              you actually use it?</label>
+            <div class="radio-group">
+              <div class="radio-card"><input type="radio" id="use1" name="would_use"
+                  value="Yes — sounds genuinely useful" required /><label for="use1">Yes — sounds genuinely
+                  useful</label></div>
+              <div class="radio-card"><input type="radio" id="use2" name="would_use"
+                  value="Maybe — depends how accurate it is" /><label for="use2">Maybe — depends how accurate it
+                  is</label></div>
+              <div class="radio-card"><input type="radio" id="use3" name="would_use" value="No — not for me" /><label
+                  for="use3">No — not for me</label></div>
+            </div>
+          </div>
+
+          <div class="question">
+            <label class="q-label"><span class="qnum">Q39.</span> Of these, which 3 matter MOST to YOUR stress? <span
+                class="hint">(pick exactly 3)</span></label>
+            <div class="picker-counter" id="topPickCounter">0 / 3 selected</div>
+            <div class="check-grid" id="topPicks">
+              <div class="check-item"><input type="checkbox" id="top1" name="top" value="academic_pressure" /><label
+                  for="top1">Academic pressure</label></div>
+              <div class="check-item"><input type="checkbox" id="top2" name="top" value="study_hours" /><label
+                  for="top2">Study hours</label></div>
+              <div class="check-item"><input type="checkbox" id="top3" name="top" value="sleep_hours" /><label
+                  for="top3">Sleep</label></div>
+              <div class="check-item"><input type="checkbox" id="top4" name="top" value="physical_activity" /><label
+                  for="top4">Physical activity</label></div>
+              <div class="check-item"><input type="checkbox" id="top5" name="top" value="financial_strain" /><label
+                  for="top5">Financial strain</label></div>
+              <div class="check-item"><input type="checkbox" id="top6" name="top" value="belonging_score" /><label
+                  for="top6">Belonging</label></div>
+              <div class="check-item"><input type="checkbox" id="top7" name="top" value="substance_use" /><label
+                  for="top7">Substance use</label></div>
+              <div class="check-item"><input type="checkbox" id="top8" name="top" value="chronic_illness" /><label
+                  for="top8">Chronic illness</label></div>
+              <div class="check-item"><input type="checkbox" id="top9" name="top" value="parent_education" /><label
+                  for="top9">Parental education</label></div>
+              <div class="check-item"><input type="checkbox" id="top10" name="top" value="bmi" /><label
+                  for="top10">BMI</label></div>
+            </div>
+          </div>
+
+          <div class="question">
+            <label class="q-label"><span class="qnum">Q40.</span> Anything we missed? What else affects YOUR stress?
+              <span class="hint">(optional, 1 line)</span></label>
+            <textarea name="missing" rows="2" placeholder="e.g., relationship stress, family expectations…"></textarea>
+          </div>
+
+          <hr class="section-divider" />
+
+          <div class="question">
+            <label class="q-label" style="font-weight:500;">
+              <span style="color:var(--accent); font-weight:700;">Optional —</span> share your email if you'd like
+              the FYP team to follow up with you (e.g., to clarify a response or share findings later).
+            </label>
+            <div class="hint" style="margin-bottom:10px;">Only used if you fill it in. Leave blank to stay fully
+              anonymous.</div>
+            <input type="email" name="email" placeholder="your@email.com (optional)" autocomplete="off" />
+          </div>
+
+          <div class="button-row">
+            <button type="button" class="btn-secondary" onclick="prevStep()">← Back</button>
+            <button type="button" class="btn-primary" onclick="submitForm()">Submit ✓</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="step" data-step="10">
+        <div class="card" style="text-align:center;">
+          <div class="success-icon">✅</div>
+          <h1 style="color:var(--ok);">Response Submitted!</h1>
+          <p class="lead" style="font-size:1.02em; color:var(--text); margin-top:8px;">
+            Your response has been recorded. Thank you for helping us validate StressEQ — every submission
+            directly improves the scientific quality of our research.
+          </p>
+
+          <div class="success-stats" style="margin-top:22px;">
+            <div class="big" id="thankYouResponseId" style="font-size:1.1em; word-break:break-all;"></div>
+            <div class="label">Your anonymous response ID — nothing links this to your identity.</div>
+          </div>
+
+          <p style="color:var(--muted); margin-top:18px; font-size:0.92em;">
+            You may close this tab. If you know a fellow student who can help, feel free to share the survey link with them.
+          </p>
+        </div>
+      </section>
+
+    </form>
+  </div>
+
+  <script>
+    // ============================================================
+    // CONFIG — paste your Google Apps Script web-app URL here
+    // (See setup instructions in the FYP team's setup doc.)
+    // If left empty, responses fall back to CSV download only.
+    // ============================================================
+    const SUBMIT_ENDPOINT = "https://script.google.com/macros/s/AKfycbx8Y01577FFX7Iz7yZ3Q79rxydspnrKE-GISZHujj_X2gcivSRRBMzuI0SVYMjXxjPtkA/exec"; // e.g., "https://script.google.com/macros/s/AKfyc.../exec"
+
+    // ============================================================
+    // State + step navigation
+    // ============================================================
+    let currentStep = 0;
+    const totalSteps = 10;
+    const data = {};
+    const STORAGE_KEY = 'stresseq_student_v1';
+
+    // PHQ-9 + GAD-7 items
+    const PHQ_ITEMS = [
+      "Little interest or pleasure in doing things",
+      "Feeling down, depressed, or hopeless",
+      "Trouble falling/staying asleep, or sleeping too much",
+      "Feeling tired or having little energy",
+      "Poor appetite or overeating",
+      "Feeling bad about yourself — that you are a failure or have let yourself or your family down",
+      "Trouble concentrating on things (reading, watching TV, studying)",
+      "Moving or speaking so slowly others could have noticed; OR being so fidgety/restless you've been moving around a lot more than usual",
+      "Thoughts that you would be better off dead, or of hurting yourself in some way"
+    ];
+
+    const GAD_ITEMS = [
+      "Feeling nervous, anxious, or on edge",
+      "Not being able to stop or control worrying",
+      "Worrying too much about different things",
+      "Trouble relaxing",
+      "Being so restless that it is hard to sit still",
+      "Becoming easily annoyed or irritable",
+      "Feeling afraid, as if something awful might happen"
+    ];
+
+    const FREQ4_LABELS = ["Not at all", "Several days", "More than half the days", "Nearly every day"];
+
+    // ============================================================
+    // Build dynamic Likert / scale groups
+    // ============================================================
+    function buildLikert(containerId, name, range = [1, 2, 3, 4, 5, 6, 7]) {
+      const c = document.getElementById(containerId);
+      if (!c) return;
+      c.innerHTML = range.map(n => `
+    <div class="likert-item">
+      <input type="radio" id="${name}_${n}" name="${name}" value="${n}" />
+      <label for="${name}_${n}">${n}</label>
+    </div>
+  `).join('');
+    }
+
+    function buildFreq4(containerId, name, qnum, labelText) {
+      return `
+    <div class="question">
+      <label class="q-label"><span class="qnum">Q${qnum}.</span> ${labelText}</label>
+      <div class="freq4">
+        ${[1, 2, 3, 4].map(i => `
+          <div class="freq4-item">
+            <input type="radio" id="${name}_${i}" name="${name}" value="${i}" required />
+            <label for="${name}_${i}"><strong>${i}</strong><br/>${FREQ4_LABELS[i - 1]}</label>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+    }
+
+    // Initialize dynamic content
+    window.addEventListener('DOMContentLoaded', () => {
+      // Restful sleep nights 0-7
+      buildLikert('rsGroup', 'restful_sleep_nights', [0, 1, 2, 3, 4, 5, 6, 7]);
+      // Physical activity 0-7
+      buildLikert('paGroup', 'physical_activity', [0, 1, 2, 3, 4, 5, 6, 7]);
+      // Belonging + financial 1-7
+      buildLikert('belongGroup', 'belonging_score');
+      buildLikert('finGroup', 'financial_strain');
+
+      // Build PHQ-9 items (Q22..Q30)
+      let phqHTML = '';
+      PHQ_ITEMS.forEach((item, i) => {
+        phqHTML += buildFreq4(`phq${i + 1}`, `phq${i + 1}`, 22 + i, item);
+      });
+      document.getElementById('phqContainer').innerHTML = phqHTML;
+
+      // Hook PHQ9 (Q9 = self-harm) → show crisis warning if not "Not at all" (which is now 1)
+      document.querySelectorAll('input[name="phq9"]').forEach(el => {
+        el.addEventListener('change', () => {
+          const v = parseInt(el.value);
+          document.getElementById('crisisWarn').classList.toggle('show', v >= 2 && el.checked);
+        });
+      });
+
+      // Build GAD-7 items (Q31..Q37)
+      let gadHTML = '';
+      GAD_ITEMS.forEach((item, i) => {
+        gadHTML += buildFreq4(`gad${i + 1}`, `gad${i + 1}`, 31 + i, item);
+      });
+      document.getElementById('gadContainer').innerHTML = gadHTML;
+
+      // Top-3 picker logic
+      document.querySelectorAll('#topPicks input[type="checkbox"]').forEach(cb => {
+        cb.addEventListener('change', () => {
+          const checked = document.querySelectorAll('#topPicks input:checked').length;
+          document.getElementById('topPickCounter').textContent = `${checked} / 3 selected`;
+          if (checked >= 3) {
+            document.querySelectorAll('#topPicks input:not(:checked)').forEach(c => c.disabled = true);
+          } else {
+            document.querySelectorAll('#topPicks input').forEach(c => c.disabled = false);
+          }
+        });
+      });
+
+      // Unit toggle for height/weight
+      document.querySelectorAll('.unit-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const target = btn.dataset.target;
+          const unit = btn.dataset.unit;
+          document.querySelectorAll(`.unit-btn[data-target="${target}"]`).forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          if (target === 'height') {
+            document.getElementById('height-cm-input').style.display = unit === 'cm' ? 'block' : 'none';
+            document.getElementById('height-ft-input').style.display = unit === 'ft' ? 'block' : 'none';
+          } else {
+            document.getElementById('weight-kg-input').style.display = unit === 'kg' ? 'block' : 'none';
+            document.getElementById('weight-lb-input').style.display = unit === 'lb' ? 'block' : 'none';
+          }
+          updateLiveBMI();
+        });
+      });
+
+      // Live BMI computation — fires on every height/weight change
+      ['height_cm', 'height_ft', 'height_in', 'weight_kg', 'weight_lb'].forEach(name => {
+        document.querySelectorAll(`[name="${name}"]`).forEach(el => {
+          el.addEventListener('input', updateLiveBMI);
+        });
+      });
+
+      // Restore saved progress
+      loadProgress();
+      updateProgressBar();
+    });
+
+    // Convert any unit input to canonical cm/kg
+    function getCanonicalHeightCm() {
+      const cm = parseFloat(document.querySelector('[name="height_cm"]').value);
+      if (cm) return cm;
+      const ft = parseFloat(document.querySelector('[name="height_ft"]').value);
+      const inch = parseFloat(document.querySelector('[name="height_in"]').value || 0);
+      if (ft) return Math.round((ft * 30.48) + (inch * 2.54));
+      return null;
+    }
+    function getCanonicalWeightKg() {
+      const kg = parseFloat(document.querySelector('[name="weight_kg"]').value);
+      if (kg) return kg;
+      const lb = parseFloat(document.querySelector('[name="weight_lb"]').value);
+      if (lb) return Math.round(lb * 0.453592 * 10) / 10;
+      return null;
+    }
+
+    function updateLiveBMI() {
+      const h = getCanonicalHeightCm();
+      const w = getCanonicalWeightKg();
+      const box = document.getElementById('bmiLive');
+      // Only display when BOTH values are within realistic adult ranges —
+      // prevents wild BMI numbers while user is still typing partial input
+      // (e.g., "5" in cm field would otherwise yield a bmi in the thousands).
+      if (!h || !w || h < 120 || h > 230 || w < 30 || w > 250) {
+        box.style.display = 'none';
+        return;
+      }
+      const bmi = +(w / Math.pow(h / 100, 2)).toFixed(1);
+      // Sanity guard: BMI itself must look human (10–60 covers 99.99% of adults)
+      if (bmi < 10 || bmi > 60) { box.style.display = 'none'; return; }
+      let cat = '', color = '#48BB78';
+      if (bmi < 18.5) { cat = 'Underweight'; color = '#3182CE'; }
+      else if (bmi < 25) { cat = 'Healthy'; color = '#48BB78'; }
+      else if (bmi < 30) { cat = 'Overweight'; color = '#DD6B20'; }
+      else { cat = 'Obese'; color = '#C53030'; }
+      document.getElementById('bmiValue').textContent = bmi;
+      document.getElementById('bmiValue').style.color = color;
+      document.getElementById('bmiCat').textContent = cat;
+      box.style.display = 'flex';
+    }
+
+    // ============================================================
+    // Step navigation
+    // ============================================================
+    function showStep(n) {
+      document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+      const next = document.querySelector(`.step[data-step="${n}"]`);
+      if (next) next.classList.add('active');
+      currentStep = n;
+      updateProgressBar();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function nextStep() {
+      if (!validateStep(currentStep)) return;
+      saveStep(currentStep);
+      showStep(currentStep + 1);
+    }
+
+    function prevStep() {
+      saveStep(currentStep);
+      showStep(currentStep - 1);
+    }
+
+    function updateProgressBar() {
+      const pct = (currentStep / (totalSteps - 1)) * 100;
+      document.getElementById('progressBar').style.width = pct + '%';
+    }
+
+    // ============================================================
+    // Validation
+    // ============================================================
+    function validateStep(step) {
+      const stepEl = document.querySelector(`.step[data-step="${step}"]`);
+      if (!stepEl) return true;
+
+      const required = stepEl.querySelectorAll('input[required], select[required], textarea[required]');
+      for (const el of required) {
+        if (el.type === 'radio') {
+          const group = stepEl.querySelectorAll(`input[name="${el.name}"]`);
+          if (![...group].some(r => r.checked)) {
+            alert(`Please answer all questions in this section before continuing.`);
+            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            return false;
+          }
+        } else if (!el.value) {
+          alert(`Please answer all questions in this section before continuing.`);
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          el.focus();
+          return false;
+        }
+      }
+      // Step 9 — top picks must be exactly 3
+      if (step === 9) {
+        const picked = document.querySelectorAll('#topPicks input:checked').length;
+        if (picked !== 3) {
+          alert(`Please pick exactly 3 factors that matter most to YOUR stress.`);
+          return false;
+        }
+      }
+      return true;
+    }
+
+    // ============================================================
+    // Save / load progress (localStorage auto-save)
+    // ============================================================
+    function saveStep(step) {
+      const stepEl = document.querySelector(`.step[data-step="${step}"]`);
+      if (!stepEl) return;
+      stepEl.querySelectorAll('input, select, textarea').forEach(el => {
+        if (el.type === 'radio' || el.type === 'checkbox') {
+          if (el.checked) {
+            if (el.type === 'checkbox') {
+              if (!data[el.name]) data[el.name] = [];
+              if (Array.isArray(data[el.name]) && !data[el.name].includes(el.value)) data[el.name].push(el.value);
+            } else {
+              data[el.name] = el.value;
+            }
+          }
+        } else if (el.value) {
+          data[el.name] = el.value;
+        }
+      });
+      // Collect "top" picks
+      const top = [...document.querySelectorAll('#topPicks input:checked')].map(c => c.value);
+      if (top.length) data.top_features = top.join(';');
+
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      flashSaved();
+    }
+
+    function loadProgress() {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return;
+      try {
+        const saved = JSON.parse(raw);
+        Object.assign(data, saved);
+        // Repopulate fields
+        Object.entries(saved).forEach(([name, val]) => {
+          if (Array.isArray(val)) {
+            val.forEach(v => {
+              const el = document.querySelector(`[name="${name}"][value="${v}"]`);
+              if (el) el.checked = true;
+            });
+          } else {
+            const els = document.querySelectorAll(`[name="${name}"]`);
+            els.forEach(el => {
+              if (el.type === 'radio' || el.type === 'checkbox') {
+                if (el.value === val) el.checked = true;
+              } else {
+                el.value = val;
+              }
+            });
+          }
+        });
+      } catch (e) { }
+    }
+
+    let saveTimer;
+    function flashSaved() {
+      const el = document.getElementById('saveState');
+      el.textContent = 'Saving…';
+      clearTimeout(saveTimer);
+      saveTimer = setTimeout(() => { el.textContent = 'Auto-saved ✓'; }, 400);
+    }
+
+    // Auto-save on any input change
+    document.addEventListener('input', () => saveStep(currentStep));
+    document.addEventListener('change', () => saveStep(currentStep));
+
+    // ============================================================
+    // Submit + score computation
+    // ============================================================
+    async function submitForm() {
+      if (!validateStep(9)) return;
+      saveStep(9);
+
+      // Canonicalise height/weight regardless of which unit they entered
+      data.height_cm = getCanonicalHeightCm();
+      data.weight_kg = getCanonicalWeightKg();
+
+      // Validate height/weight provided
+      if (!data.height_cm || !data.weight_kg) {
+        alert('Please go back and enter your height and weight (any unit).');
+        return;
+      }
+
+      // Compute PHQ-9 (converting 1-4 scale back to clinical 0-3 for score)
+      let phq = 0;
+      for (let i = 1; i <= 9; i++) {
+        const v = parseInt(data[`phq${i}`] || 1);
+        phq += isNaN(v) ? 0 : (v - 1);
+      }
+      // Compute GAD-7 (converting 1-4 scale back to clinical 0-3 for score)
+      let gad = 0;
+      for (let i = 1; i <= 7; i++) {
+        const v = parseInt(data[`gad${i}`] || 1);
+        gad += isNaN(v) ? 0 : (v - 1);
+      }
+      // Stress band (Cohen-style)
+      let band;
+      if (phq >= 10 || gad >= 10) band = 'High';
+      else if (phq >= 5 || gad >= 5) band = 'Medium';
+      else band = 'Low';
+
+      data.phq9_score = phq;
+      data.gad7_score = gad;
+      data.stress_level = band;
+
+      // Compute substance_use_score (0-3)
+      const tobaccoUsed = data.tobacco && data.tobacco !== 'Never' ? 1 : 0;
+      const alcoholUsed = data.alcohol && data.alcohol !== 'Never' ? 1 : 0;
+      const drugUsed = data.drugs === 'Yes' ? 1 : 0;
+      data.substance_use_score = tobaccoUsed + alcoholUsed + drugUsed;
+
+      // Compute chronic_illness tier
+      const sev = [...document.querySelectorAll('input[name="chronic_sev"]:checked')].length;
+      const mod = [...document.querySelectorAll('input[name="chronic_mod"]:checked')].length;
+      const mild = [...document.querySelectorAll('input[name="chronic_mild"]:checked')].length;
+      data.chronic_illness_tier = sev > 0 ? 3 : mod > 0 ? 2 : mild > 0 ? 1 : 0;
+
+      // BMI from canonical values
+      data.bmi = +(data.weight_kg / Math.pow(data.height_cm / 100, 2)).toFixed(1);
+
+      data.submitted_at = new Date().toISOString();
+      data.response_id = 'r_' + Math.random().toString(36).slice(2, 10) + '_' + Date.now();
+
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+
+      // Move to thank-you screen immediately (don't make user wait on network)
+      showStep(10);
+      const ridEl = document.getElementById('thankYouResponseId');
+      if (ridEl) ridEl.textContent = data.response_id;
+
+      // POST to Google Apps Script. Using application/x-www-form-urlencoded
+      // lets the script receive the JSON without triggering a CORS preflight
+      // AND lets us still drop mode:'no-cors' so genuine errors surface.
+      if (SUBMIT_ENDPOINT) {
+        try {
+          const formBody = new URLSearchParams();
+          formBody.append('payload', JSON.stringify(data));
+          const res = await fetch(SUBMIT_ENDPOINT, {
+            method: 'POST',
+            body: formBody
+          });
+          const status = document.getElementById('submitStatus');
+          if (status && res && res.ok) {
+            status.textContent = '✓ Securely recorded.';
+            status.style.color = '#38A169';
+          } else if (status) {
+            status.textContent = '⚠ We could not confirm storage — refresh and re-submit if you can.';
+            status.style.color = '#DD6B20';
+          }
+        } catch (e) {
+          const status = document.getElementById('submitStatus');
+          if (status) {
+            status.textContent = '⚠ Network issue — please refresh and re-submit if possible.';
+            status.style.color = '#DD6B20';
+          }
+        }
+      }
+    }
+
+    // ============================================================
+    // CSV export
+    // ============================================================
+    function downloadCSV() {
+      const cols = [
+        'response_id', 'submitted_at',
+        // demographics
+        'age', 'gender', 'is_international', 'race', 'education_level', 'field_of_study',
+        // academic
+        'gpa', 'academic_pressure', 'study_hours',
+        // sleep / body
+        'sleep_hours', 'restful_sleep_nights', 'physical_activity', 'height_cm', 'weight_kg', 'bmi',
+        // substance
+        'tobacco', 'alcohol', 'drugs', 'substance_use_score',
+        // belonging / SES
+        'belonging_score', 'parent_education', 'financial_strain',
+        // chronic
+        'chronic_illness_tier',
+        // PHQ
+        'phq1', 'phq2', 'phq3', 'phq4', 'phq5', 'phq6', 'phq7', 'phq8', 'phq9', 'phq9_score',
+        // GAD
+        'gad1', 'gad2', 'gad3', 'gad4', 'gad5', 'gad6', 'gad7', 'gad7_score',
+        // target
+        'stress_level',
+        // feedback
+        'would_use', 'top_features', 'missing',
+        // optional contact (last column so it visually separates from data)
+        'email'
+      ];
+      const header = cols.join(',');
+      const row = cols.map(c => {
+        let v = data[c];
+        if (v === undefined || v === null) v = '';
+        v = String(v).replace(/"/g, '""');
+        return /[",\n]/.test(v) ? `"${v}"` : v;
+      }).join(',');
+
+      const csv = header + '\n' + row + '\n';
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `stresseq_response_${Date.now()}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+  </script>
+</body>
+
+</html>
