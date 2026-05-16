@@ -9,18 +9,19 @@
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
     :root {
-      --primary: #2B6CB0;
-      --primary-dark: #1A4F8A;
-      --accent: #38B2AC;
-      --bg-grad-1: #EBF8FF;
-      --bg-grad-2: #E6FFFA;
-      --text: #2D3748;
-      --muted: #718096;
+      --primary: #0284C7;
+      --primary-dark: #0369A1;
+      --accent: #06B6D4;
+      --bg-grad-1: #F0F9FF;
+      --bg-grad-2: #E0F2FE;
+      --text: #1E293B;
+      --muted: #64748B;
       --card: #FFFFFF;
       --border: #E2E8F0;
-      --soft: #F7FAFC;
-      --warn: #F6AD55;
-      --ok: #48BB78;
+      --soft: #F8FAFC;
+      --warn: #F59E0B;
+      --ok: #10B981;
+      --step-accent: #0284C7;
     }
 
     * {
@@ -620,12 +621,146 @@
     }
 
     /* Hidden steps */
+    /* ---- Step accent stripe ---- */
+    .card { border-top: 4px solid var(--step-accent); }
+
+    /* ---- Skip button ---- */
+    .skip-btn {
+      display: inline-block;
+      margin-top: 6px;
+      font-size: 0.8em;
+      color: var(--muted);
+      background: none;
+      border: none;
+      cursor: pointer;
+      text-decoration: underline;
+      padding: 0;
+    }
+    .skip-btn:hover { color: var(--primary); }
+
+    /* ---- Toast milestone ---- */
+    #toast {
+      position: fixed;
+      bottom: 28px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: var(--primary);
+      color: #fff;
+      padding: 14px 28px;
+      border-radius: 40px;
+      font-size: 0.95em;
+      font-weight: 600;
+      box-shadow: 0 8px 32px rgba(79,70,229,0.35);
+      z-index: 9999;
+      transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1), opacity 0.3s;
+      opacity: 0;
+      white-space: nowrap;
+    }
+    #toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    /* ---- Confetti canvas ---- */
+    #confetti-canvas {
+      position: fixed; top:0; left:0;
+      width:100%; height:100%;
+      pointer-events:none; z-index:9998;
+    }
+
+    /* ---- Stress profile card (thank-you) ---- */
+    .profile-card {
+      background: linear-gradient(135deg, #0369A1 0%, #06B6D4 100%);
+      border-radius: 20px;
+      padding: 28px 24px;
+      color: #fff;
+      margin: 24px 0 16px;
+      text-align: center;
+    }
+    .profile-card .level-badge {
+      display: inline-block;
+      padding: 6px 20px;
+      border-radius: 30px;
+      font-size: 0.9em;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+    }
+    .level-badge.high   { background: #EF4444; }
+    .level-badge.medium { background: #F59E0B; color:#1E293B; }
+    .level-badge.low    { background: #10B981; }
+
+    .stress-meter {
+      width: 100%;
+      height: 12px;
+      background: rgba(255,255,255,0.25);
+      border-radius: 8px;
+      overflow: hidden;
+      margin: 12px 0 6px;
+    }
+    .stress-meter-fill {
+      height: 100%;
+      border-radius: 8px;
+      width: 0;
+      transition: width 1.4s cubic-bezier(0.22,1,0.36,1);
+    }
+    .meter-high   { background: #EF4444; }
+    .meter-medium { background: #F59E0B; }
+    .meter-low    { background: #10B981; }
+
+    .profile-tip {
+      background: rgba(255,255,255,0.15);
+      border-radius: 12px;
+      padding: 12px 16px;
+      font-size: 0.88em;
+      margin-top: 14px;
+      text-align: left;
+      line-height: 1.5;
+    }
+
+    .share-btn {
+      margin-top: 16px;
+      padding: 10px 24px;
+      border-radius: 30px;
+      border: 2px solid rgba(255,255,255,0.6);
+      background: transparent;
+      color: #fff;
+      font-weight: 600;
+      font-size: 0.9em;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .share-btn:hover { background: rgba(255,255,255,0.2); }
+
+    /* ---- Step transition animation ---- */
     .step {
       display: none;
     }
 
     .step.active {
       display: block;
+      animation: slideIn 0.32s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Radio card pop on select */
+    .radio-card input:checked + label {
+      transform: scale(1.04);
+      transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    /* Progress % label */
+    .progress-pct {
+      text-align: right;
+      font-size: 0.75em;
+      color: var(--muted);
+      padding: 2px 2px 0;
+      font-weight: 600;
     }
 
     /* Mobile */
@@ -688,6 +823,8 @@
 </head>
 
 <body>
+  <canvas id="confetti-canvas"></canvas>
+  <div id="toast"></div>
   <div class="shell">
     <div class="topbar">
       <div class="brand">StressEQ <span class="dot">●</span> Student Survey</div>
@@ -697,59 +834,63 @@
     <div class="progress-wrap">
       <div class="progress-bar" id="progressBar"></div>
     </div>
+    <div class="progress-pct" id="progressPct">0%</div>
 
     <form id="surveyForm">
 
       <!-- ===================== STEP 0: COVER ===================== -->
       <section class="step active" data-step="0">
-        <div class="card">
-          <h1>Academic Stress Assessment<br /><span style="font-size:0.55em; font-weight:500; color:var(--muted); letter-spacing:0;">Helping us understand student wellbeing at our university</span></h1>
-          <p class="lead" style="font-size:1.0em; color:var(--text); margin-top:14px; line-height:1.5;">
-            <strong>StressEQ</strong> is our Final Year Project — an AI system that monitors and forecasts student stress.
-            It lets you run <strong>Scenario-Based Analysis</strong> (e.g. "What if I sleep more?"), delivers
-            <strong>personalised recommendations</strong>, and includes an <strong>AI Coach</strong> based on clinical research.
+        <div class="card" style="text-align:center; padding: 36px 28px 32px;">
+
+          <!-- Hero icon -->
+          <div style="font-size:3.2em; margin-bottom:16px; animation: popIn 0.5s cubic-bezier(0.34,1.56,0.64,1) both;">🧠</div>
+
+          <!-- Headline -->
+          <h1 style="font-size:1.9em; font-weight:800; line-height:1.2; margin-bottom:10px;">
+            How stressed are you, <span style="color:var(--step-accent);">really?</span>
+          </h1>
+
+          <!-- One-liner -->
+          <p style="color:var(--muted); font-size:1em; margin-bottom:28px; line-height:1.5;">
+            StressEQ is our FYP — an AI that predicts and forecasts stress.<br>
+            <strong style="color:var(--text);">Help us build it.</strong> Takes ~4 minutes. Fully anonymous.
           </p>
 
-          <p style="margin: 12px 0 8px; color: var(--text); font-size:0.95em; line-height:1.4;">
-            To validate StressEQ on our university population, we need real student data to strengthen our scientific study. That's where you come in.
-          </p>
-
-          <div class="cover-meta" style="margin-top:14px;">
-            <div class="cover-meta-item"><span class="num">~6 min</span><span class="lbl">Quick</span></div>
-            <div class="cover-meta-item"><span class="num">Anonymous</span><span class="lbl">No name, no device</span></div>
-            <div class="cover-meta-item"><span class="num">Confidential</span><span class="lbl">Random ID only</span></div>
-          </div>
-          <p style="font-size:0.8em; color:var(--muted); margin: 8px 0 16px;">
-            <span style="color:var(--primary); font-weight:600;">&#9679; Student Survey</span>
-            &ensp;|&ensp;
-            <span style="font-weight:500;">Faculty &amp; Staff Survey</span>
-          </p>
-
-          <p style="color: var(--muted); font-size:0.92em; margin: 18px 0;">
-            A few questions ask how you've been feeling lately — these come from established wellbeing screeners. You
-            can skip anything that feels heavy. Your responses go into our research database under a random ID, not
-            your name or email. You'd be helping us defend our FYP — and (hopefully) graduate. 🎓
-          </p>
-
-          <div class="callout">
-            <strong>Heads up:</strong> A few questions are drawn from the PHQ-9 and GAD-7 — internationally
-            validated clinical screeners. These are standard research instruments, not a diagnosis. Your responses
-            are stored under a randomly generated ID, with no link to your name or email.
+          <!-- 3 trust pills -->
+          <div style="display:flex; justify-content:center; gap:10px; flex-wrap:wrap; margin-bottom:28px;">
+            <span style="background:var(--soft); border:1px solid var(--border); border-radius:30px; padding:6px 16px; font-size:0.82em; font-weight:600; color:var(--text);">⏱ ~4 minutes</span>
+            <span style="background:var(--soft); border:1px solid var(--border); border-radius:30px; padding:6px 16px; font-size:0.82em; font-weight:600; color:var(--text);">🔒 Anonymous</span>
+            <span style="background:var(--soft); border:1px solid var(--border); border-radius:30px; padding:6px 16px; font-size:0.82em; font-weight:600; color:var(--text);">🤝 Support our research</span>
           </div>
 
-          <div class="button-row cover-start-row" style="border-top:none; padding-top:8px;">
-            <span style="color:var(--muted); font-size:0.82em; align-self:center;">~6 minutes &nbsp;·&nbsp; anonymous</span>
-            <button type="button" class="btn-primary cover-start-btn" onclick="nextStep()">Let's go →</button>
-          </div>
+          <!-- Big CTA -->
+          <button type="button" class="btn-primary" onclick="nextStep()"
+            style="width:100%; padding:16px; font-size:1.1em; font-weight:700; border-radius:14px; letter-spacing:0.01em;">
+            Start Survey →
+          </button>
+
+          <!-- Fine print -->
+          <p style="color:var(--muted); font-size:0.75em; margin-top:16px; line-height:1.4;">
+            Responses are stored under a random ID — never linked to your name.<br>
+            A few questions use standard clinical screeners (PHQ-9, GAD-7) used in research worldwide.
+          </p>
         </div>
+
+        <style>
+          @keyframes popIn {
+            from { transform: scale(0.5); opacity: 0; }
+            to   { transform: scale(1);   opacity: 1; }
+          }
+        </style>
       </section>
+
 
       <!-- ===================== STEP 1: BASICS ===================== -->
       <section class="step" data-step="1">
         <div class="card">
-          <span class="step-badge">Section 1 of 9 · Basics</span>
-          <h2>First, the basics</h2>
-          <p class="lead">No identifying info — just rough demographics so we can compare across groups.</p>
+          <span class="step-badge">Section 1 of 9 · About you</span>
+          <h2>Quick intro</h2>
+          <p class="lead">No names, no personal info — just a few basics so we can compare across groups.</p>
 
           <div class="question">
             <label class="q-label"><span class="qnum">Q1.</span> What is your age?</label>
@@ -778,38 +919,35 @@
             </div>
           </div>
 
+
           <div class="question">
-            <label class="q-label"><span class="qnum">Q4.</span> Race / ethnicity</label>
+            <label class="q-label"><span class="qnum">Q4.</span> Which best describes your background? <span class="hint">(optional)</span></label>
             <div class="radio-group">
-              <div class="radio-card"><input type="radio" id="r1" name="race" value="Hispanic" required /><label
-                  for="r1">Hispanic / Latino</label></div>
-              <div class="radio-card"><input type="radio" id="r2" name="race" value="Black" /><label for="r2">Black /
-                  African</label></div>
-              <div class="radio-card"><input type="radio" id="r3" name="race" value="Asian" /><label
-                  for="r3">Asian</label></div>
-              <div class="radio-card"><input type="radio" id="r4" name="race" value="White" /><label
-                  for="r4">White</label></div>
-              <div class="radio-card"><input type="radio" id="r5" name="race" value="Other" /><label for="r5">Other /
-                  Mixed</label></div>
+              <div class="radio-card"><input type="radio" id="r1" name="race" value="Asian" /><label for="r1">Asian</label></div>
+              <div class="radio-card"><input type="radio" id="r2" name="race" value="Black" /><label for="r2">Black</label></div>
+              <div class="radio-card"><input type="radio" id="r3" name="race" value="White" /><label for="r3">White</label></div>
+              <div class="radio-card"><input type="radio" id="r4" name="race" value="Other" /><label for="r4">Other / Mixed</label></div>
+              <div class="radio-card"><input type="radio" id="r5" name="race" value="Prefer not to say" /><label for="r5">Prefer not to say</label></div>
             </div>
           </div>
 
           <div class="row-2">
             <div class="question">
-              <label class="q-label"><span class="qnum">Q5.</span> Education level</label>
+              <label class="q-label"><span class="qnum">Q5.</span> What year are you in?</label>
               <select name="education_level" required>
                 <option value="">— select —</option>
                 <option>Bachelor's Year 1</option>
                 <option>Bachelor's Year 2</option>
                 <option>Bachelor's Year 3</option>
                 <option>Bachelor's Year 4</option>
+                <option>Bachelor's Year 5 (e.g. MBBS, Arch)</option>
                 <option>Master's</option>
-                <option>PhD</option>
+                <option>PhD / Doctoral</option>
               </select>
             </div>
             <div class="question">
               <label class="q-label"><span class="qnum">Q6.</span> Field of study</label>
-              <select name="field_of_study" required>
+              <select name="field_of_study" required id="fieldSelect" onchange="toggleOtherField()">
                 <option value="">— select —</option>
                 <option>Engineering / Computing</option>
                 <option>Medicine / Health Sciences</option>
@@ -817,7 +955,10 @@
                 <option>Arts / Humanities</option>
                 <option>Natural Sciences</option>
                 <option>Social Sciences</option>
+                <option>Law</option>
+                <option value="Other">Other</option>
               </select>
+              <input type="text" id="fieldOtherInput" name="field_of_study_other" placeholder="Please specify your field…" style="display:none; margin-top:8px;" />
             </div>
           </div>
 
@@ -831,18 +972,18 @@
       <!-- ===================== STEP 2: ACADEMIC ===================== -->
       <section class="step" data-step="2">
         <div class="card">
-          <span class="step-badge">Section 2 of 9 · Academic life</span>
-          <h2>Your studies 📚</h2>
-          <p class="lead">How's the academic side going lately?</p>
+          <span class="step-badge">Section 2 of 9 · Academics</span>
+          <h2>Your studies</h2>
+          <p class="lead">How's the academic pressure been lately?</p>
 
           <div class="question">
-            <label class="q-label"><span class="qnum">Q7.</span> What is your current CGPA or Percentage? <span class="hint">(We'll convert it automatically)</span></label>
+            <label class="q-label"><span class="qnum">Q7.</span> What is your current CGPA or Percentage? <span
+                class="hint">(We'll convert it automatically)</span></label>
             <input type="number" name="gpa" step="0.01" min="0" max="100" placeholder="e.g., 3.45 or 82" required />
           </div>
 
           <div class="question">
-            <label class="q-label"><span class="qnum">Q8.</span> Over the past 4 weeks, my academic load has
-              felt:</label>
+            <label class="q-label"><span class="qnum">Q8.</span> How heavy has your study workload felt lately? <span class="hint">(past 4 weeks)</span></label>
             <div class="likert">
               <div class="likert-item"><input type="radio" id="ap1" name="academic_pressure" value="1" required /><label
                   for="ap1">1</label></div>
@@ -863,7 +1004,7 @@
           </div>
 
           <div class="question">
-            <label class="q-label"><span class="qnum">Q9.</span> Hours per week studying outside class</label>
+            <label class="q-label"><span class="qnum">Q9.</span> On a typical week, how many hours do you study outside of class? <span class="hint">(Don't overthink — rough estimate is fine)</span></label>
             <div class="radio-group">
               <div class="radio-card"><input type="radio" id="sh1" name="study_hours" value="0-5" required /><label
                   for="sh1">0–5</label></div>
@@ -889,25 +1030,21 @@
       <section class="step" data-step="3">
         <div class="card">
           <span class="step-badge">Section 3 of 9 · Sleep &amp; body</span>
-          <h2>How are you sleeping? 😴</h2>
-          <p class="lead">Sleep + activity are huge stress predictors. Be honest — no judgment.</p>
+          <h2>Sleep &amp; activity</h2>
+          <p class="lead">Sleep and exercise are the biggest predictors of stress. Be honest — your data is anonymous.</p>
 
           <div class="question">
-            <label class="q-label"><span class="qnum">Q10.</span> On average over the past 4 weeks, hours of sleep per
-              night</label>
+            <label class="q-label"><span class="qnum">Q10.</span> On average, how many hours do you sleep per night?</label>
             <input type="number" name="sleep_hours" step="0.5" min="0" max="14" placeholder="e.g., 6.5" required />
           </div>
 
           <div class="question">
-            <label class="q-label"><span class="qnum">Q11.</span> In the past 7 days, on how many mornings did you wake
-              up
-              feeling refreshed (not tired)?</label>
+            <label class="q-label"><span class="qnum">Q11.</span> Last 7 nights — how many times did you wake up feeling refreshed? <span class="hint">(0 = never, 7 = every night)</span></label>
             <div class="likert" id="rsGroup"></div>
           </div>
 
           <div class="question">
-            <label class="q-label"><span class="qnum">Q12.</span> Days in the past week with ≥30 min of
-              moderate-to-vigorous physical activity</label>
+            <label class="q-label"><span class="qnum">Q12.</span> In the past week, how many days did you exercise or walk for at least 30 minutes?</label>
             <div class="likert" id="paGroup"></div>
           </div>
 
@@ -961,12 +1098,12 @@
       <section class="step" data-step="4">
         <div class="card">
           <span class="step-badge">Section 4 of 9 · Lifestyle</span>
-          <h2>Your habits 🌿</h2>
-          <p class="lead">Past 30 days. Your answers are anonymous — we just want patterns, not personal details.</p>
+          <h2>Your habits</h2>
+          <p class="lead">Past 30 days. Everything here is anonymous — we only look at group patterns, not individuals.</p>
 
           <div class="question">
-            <label class="q-label"><span class="qnum">Q15.</span> How often did you use tobacco / nicotine (cigarettes,
-              vape, pouches, etc.)?</label>
+            <label class="q-label"><span class="qnum">Q15.</span> How often did you use tobacco or nicotine (cigarettes, vapes, etc.)?</label>
+            <button type="button" class="skip-btn" onclick="skipQuestion('tobacco','Never')">Skip this question</button>
             <div class="radio-group">
               <div class="radio-card"><input type="radio" id="tob1" name="tobacco" value="Never" required /><label
                   for="tob1">Never</label></div>
@@ -981,6 +1118,7 @@
 
           <div class="question">
             <label class="q-label"><span class="qnum">Q16.</span> How often did you consume alcohol?</label>
+            <button type="button" class="skip-btn" onclick="skipQuestion('alcohol','Never')">Skip this question</button>
             <div class="radio-group">
               <div class="radio-card"><input type="radio" id="alc1" name="alcohol" value="Never" required /><label
                   for="alc1">Never</label></div>
@@ -994,8 +1132,8 @@
           </div>
 
           <div class="question">
-            <label class="q-label"><span class="qnum">Q17.</span> Did you use any other recreational substance
-              (cannabis, prescription misuse, other)?</label>
+            <label class="q-label"><span class="qnum">Q17.</span> Did you use any other recreational substance (e.g. cannabis)?</label>
+            <button type="button" class="skip-btn" onclick="skipQuestion('drugs','No')">Skip this question</button>
             <div class="radio-group">
               <div class="radio-card"><input type="radio" id="drg1" name="drugs" value="No" required /><label
                   for="drg1">No</label></div>
@@ -1014,19 +1152,25 @@
       <!-- ===================== STEP 5: BELONGING & SES ===================== -->
       <section class="step" data-step="5">
         <div class="card">
-          <span class="step-badge">Section 5 of 9 · Connection &amp; money</span>
-          <h2>Belonging &amp; finances 🤝</h2>
-          <p class="lead">How you're feeling about your place at uni and your money situation.</p>
+          <span class="step-badge">Section 5 of 9 · Belonging &amp; finances</span>
+          <h2>Your situation</h2>
+          <p class="lead">Two quick questions about how you're feeling at uni and about money.</p>
 
           <div class="question">
-            <label class="q-label"><span class="qnum">Q18.</span> "I feel I belong at this university."</label>
-            <div class="likert" id="belongGroup"></div>
-            <div class="likert-anchors"><span>Strongly Disagree</span><span>Strongly Agree</span></div>
+            <label class="q-label"><span class="qnum">Q18.</span> Do you feel like you belong / fit in at your university?</label>
+            <div class="radio-group">
+              <div class="radio-card"><input type="radio" id="bel1" name="belonging_score" value="1" required /><label for="bel1">Not at all</label></div>
+              <div class="radio-card"><input type="radio" id="bel2" name="belonging_score" value="2" /><label for="bel2">Not really</label></div>
+              <div class="radio-card"><input type="radio" id="bel3" name="belonging_score" value="3" /><label for="bel3">Somewhat</label></div>
+              <div class="radio-card"><input type="radio" id="bel4" name="belonging_score" value="4" /><label for="bel4">Mostly yes</label></div>
+              <div class="radio-card"><input type="radio" id="bel5" name="belonging_score" value="5" /><label for="bel5">Definitely</label></div>
+              <div class="radio-card"><input type="radio" id="bel6" name="belonging_score" value="6" /><label for="bel6">Strongly yes</label></div>
+              <div class="radio-card"><input type="radio" id="bel7" name="belonging_score" value="7" /><label for="bel7">Completely</label></div>
+            </div>
           </div>
 
           <div class="question">
-            <label class="q-label"><span class="qnum">Q19.</span> Highest education level completed by your parent /
-              guardian</label>
+            <label class="q-label"><span class="qnum">Q19.</span> What is the highest level of education your parent or guardian completed?</label>
             <select name="parent_education" required>
               <option value="">— select —</option>
               <option>No formal education</option>
@@ -1039,9 +1183,16 @@
           </div>
 
           <div class="question">
-            <label class="q-label"><span class="qnum">Q20.</span> "I worry about my finances often."</label>
-            <div class="likert" id="finGroup"></div>
-            <div class="likert-anchors"><span>Strongly Disagree</span><span>Strongly Agree</span></div>
+            <label class="q-label"><span class="qnum">Q20.</span> How often do you worry about money or finances?</label>
+            <div class="radio-group">
+              <div class="radio-card"><input type="radio" id="fin1" name="financial_strain" value="1" required /><label for="fin1">Never</label></div>
+              <div class="radio-card"><input type="radio" id="fin2" name="financial_strain" value="2" /><label for="fin2">Rarely</label></div>
+              <div class="radio-card"><input type="radio" id="fin3" name="financial_strain" value="3" /><label for="fin3">Sometimes</label></div>
+              <div class="radio-card"><input type="radio" id="fin4" name="financial_strain" value="4" /><label for="fin4">Often</label></div>
+              <div class="radio-card"><input type="radio" id="fin5" name="financial_strain" value="5" /><label for="fin5">Frequently</label></div>
+              <div class="radio-card"><input type="radio" id="fin6" name="financial_strain" value="6" /><label for="fin6">Most days</label></div>
+              <div class="radio-card"><input type="radio" id="fin7" name="financial_strain" value="7" /><label for="fin7">Constantly</label></div>
+            </div>
           </div>
 
           <div class="button-row">
@@ -1055,47 +1206,16 @@
       <section class="step" data-step="6">
         <div class="card">
           <span class="step-badge">Section 6 of 9 · Health</span>
-          <h2>Any chronic conditions? 🩺</h2>
-          <p class="lead">Tick anything you currently have a diagnosis for. Tick "None" if not applicable.</p>
+          <h2>Any health conditions?</h2>
+          <p class="lead">One quick question — your answer helps the AI understand your full picture.</p>
 
           <div class="question">
-            <label class="q-label"><span class="qnum">Q21.</span> Diagnosed chronic condition(s):</label>
-
-            <div class="check-grid">
-              <div class="check-item"><input type="checkbox" id="cn" name="chronic_none" /><label for="cn">None</label>
-              </div>
-            </div>
-
-            <div class="check-tier">Mild tier</div>
-            <div class="check-grid">
-              <div class="check-item"><input type="checkbox" id="cm1" name="chronic_mild" value="Asthma" /><label
-                  for="cm1">Asthma</label></div>
-              <div class="check-item"><input type="checkbox" id="cm2" name="chronic_mild"
-                  value="High cholesterol" /><label for="cm2">High cholesterol</label></div>
-            </div>
-
-            <div class="check-tier">Moderate tier</div>
-            <div class="check-grid">
-              <div class="check-item"><input type="checkbox" id="cmo1" name="chronic_mod" value="Hypertension" /><label
-                  for="cmo1">Hypertension</label></div>
-              <div class="check-item"><input type="checkbox" id="cmo2" name="chronic_mod" value="Thyroid" /><label
-                  for="cmo2">Thyroid disorder</label></div>
-              <div class="check-item"><input type="checkbox" id="cmo3" name="chronic_mod"
-                  value="Gastrointestinal" /><label for="cmo3">Gastrointestinal</label></div>
-              <div class="check-item"><input type="checkbox" id="cmo4" name="chronic_mod" value="Arthritis" /><label
-                  for="cmo4">Arthritis</label></div>
-            </div>
-
-            <div class="check-tier">Severe tier</div>
-            <div class="check-grid">
-              <div class="check-item"><input type="checkbox" id="cs1" name="chronic_sev" value="Diabetes" /><label
-                  for="cs1">Diabetes</label></div>
-              <div class="check-item"><input type="checkbox" id="cs2" name="chronic_sev" value="Sickle cell" /><label
-                  for="cs2">Sickle cell</label></div>
-              <div class="check-item"><input type="checkbox" id="cs3" name="chronic_sev" value="Seizure" /><label
-                  for="cs3">Seizure disorder</label></div>
-              <div class="check-item"><input type="checkbox" id="cs4" name="chronic_sev" value="Cancer" /><label
-                  for="cs4">Cancer</label></div>
+            <label class="q-label"><span class="qnum">Q20.</span> Do you have any diagnosed chronic health condition?</label>
+            <div class="radio-group">
+              <div class="radio-card"><input type="radio" id="chr0" name="chronic_illness_tier" value="0" required /><label for="chr0">None</label></div>
+              <div class="radio-card"><input type="radio" id="chr1" name="chronic_illness_tier" value="1" /><label for="chr1">Mild <span class="hint">(e.g. asthma, high cholesterol)</span></label></div>
+              <div class="radio-card"><input type="radio" id="chr2" name="chronic_illness_tier" value="2" /><label for="chr2">Moderate <span class="hint">(e.g. thyroid, hypertension, gastro)</span></label></div>
+              <div class="radio-card"><input type="radio" id="chr3" name="chronic_illness_tier" value="3" /><label for="chr3">Severe <span class="hint">(e.g. diabetes, epilepsy, cancer)</span></label></div>
             </div>
           </div>
 
@@ -1109,15 +1229,13 @@
       <!-- ===================== STEP 7: PHQ-9 ===================== -->
       <section class="step" data-step="7">
         <div class="card">
-          <span class="step-badge">Section 7 of 9 · How you've been feeling</span>
-          <h2>The past 2 weeks 💭</h2>
-          <p class="lead">These come from the PHQ-9, a clinical screener used worldwide. Answer how often each statement
-            has applied to you.</p>
+          <span class="step-badge">Section 7 of 9 · Wellbeing check</span>
+          <h2>How have you been feeling?</h2>
+          <p class="lead">These are standard wellbeing questions used in research worldwide. There are no right or wrong answers — just be honest about the past 2 weeks.</p>
 
           <div class="callout">
-            <strong>Same scale for all 9 items below:</strong><br />
-            <strong>1</strong> Not at all · <strong>2</strong> Several days · <strong>3</strong> More than half the days
-            · <strong>4</strong> Nearly every day
+            <strong>For each statement, pick how often it applied to you:</strong><br />
+            <strong>1</strong> Not at all &nbsp;·&nbsp; <strong>2</strong> A few days &nbsp;·&nbsp; <strong>3</strong> More than half the days &nbsp;·&nbsp; <strong>4</strong> Almost every day
           </div>
 
           <div id="phqContainer"></div>
@@ -1139,12 +1257,11 @@
       <section class="step" data-step="8">
         <div class="card">
           <span class="step-badge">Section 8 of 9 · Worry &amp; anxiety</span>
-          <h2>How anxious have you been? 🌊</h2>
-          <p class="lead">7 more items — these come from the GAD-7 anxiety screener. Same response scale as before.</p>
+          <h2>One more set — almost done!</h2>
+          <p class="lead">7 more questions, same scale as before. These cover worry and anxious feelings in the past 2 weeks.</p>
 
           <div class="callout">
-            <strong>1</strong> Not at all · <strong>2</strong> Several days · <strong>3</strong> More than half the days
-            · <strong>4</strong> Nearly every day
+            <strong>1</strong> Not at all &nbsp;·&nbsp; <strong>2</strong> A few days &nbsp;·&nbsp; <strong>3</strong> More than half the days &nbsp;·&nbsp; <strong>4</strong> Almost every day
           </div>
 
           <div id="gadContainer"></div>
@@ -1159,14 +1276,12 @@
       <!-- ===================== STEP 9: FEEDBACK ===================== -->
       <section class="step" data-step="9">
         <div class="card">
-          <span class="step-badge">Section 9 of 9 · Help us improve</span>
-          <h2>Last bit — your feedback 🚀</h2>
-          <p class="lead">Tell us what you think before we let you go.</p>
+          <span class="step-badge">Section 9 of 9 · Last question!</span>
+          <h2>Almost there — just 2 quick ones</h2>
+          <p class="lead">Your thoughts on StressEQ itself.</p>
 
           <div class="question">
-            <label class="q-label"><span class="qnum">Q38.</span> Imagine StressEQ is live as an app on your phone —
-              would
-              you actually use it?</label>
+            <label class="q-label"><span class="qnum">Q37.</span> Would you use StressEQ as an app on your phone?</label>
             <div class="radio-group">
               <div class="radio-card"><input type="radio" id="use1" name="would_use"
                   value="Yes — sounds genuinely useful" required /><label for="use1">Yes — sounds genuinely
@@ -1207,11 +1322,6 @@
             </div>
           </div>
 
-          <div class="question">
-            <label class="q-label"><span class="qnum">Q40.</span> Anything we missed? What else affects YOUR stress?
-              <span class="hint">(optional, 1 line)</span></label>
-            <textarea name="missing" rows="2" placeholder="e.g., relationship stress, family expectations…"></textarea>
-          </div>
 
           <hr class="section-divider" />
 
@@ -1233,22 +1343,31 @@
       </section>
 
       <section class="step" data-step="10">
-        <div class="card" style="text-align:center;">
-          <div class="success-icon">✅</div>
-          <h1 style="color:var(--ok);">Response Submitted!</h1>
-          <p class="lead" style="font-size:1.02em; color:var(--text); margin-top:8px;">
-            Your response has been recorded. Thank you for helping us validate StressEQ — every submission
-            directly improves the scientific quality of our research.
+        <div class="card" style="text-align:center; border-top:4px solid #10B981;">
+          <div style="font-size:3em; margin-bottom:8px;">🎉</div>
+          <h1 style="color:var(--ok); font-size:1.6em;">You're amazing — thank you!</h1>
+          <p class="lead" style="color:var(--text); margin-top:8px; font-size:1em;">
+            Your response has been recorded and will directly improve StressEQ's accuracy.
+            Here's a quick look at your wellbeing snapshot.
           </p>
 
-          <div class="success-stats" style="margin-top:22px;">
-            <div class="big" id="thankYouResponseId" style="font-size:1.1em; word-break:break-all;"></div>
-            <div class="label">Your anonymous response ID — nothing links this to your identity.</div>
+          <div class="profile-card" id="profileCard">
+            <div style="font-size:0.82em; opacity:0.85; margin-bottom:4px;">Your Wellbeing Snapshot</div>
+            <div class="level-badge" id="profileBadge">—</div>
+            <div style="font-size:1.5em; font-weight:700; margin:4px 0 2px;" id="profileLabel">Calculating...</div>
+            <div class="stress-meter">
+              <div class="stress-meter-fill" id="meterFill"></div>
+            </div>
+            <div style="font-size:0.78em; opacity:0.75; margin-bottom:8px;" id="meterSubtext"></div>
+            <div class="profile-tip" id="profileTip"></div>
+            <button class="share-btn" onclick="shareLink()">Share survey with a friend</button>
           </div>
 
-          <p style="color:var(--muted); margin-top:18px; font-size:0.92em;">
-            You may close this tab. If you know a fellow student who can help, feel free to share the survey link with them.
-          </p>
+          <div style="background:var(--soft); border-radius:12px; padding:12px 16px; margin:12px 0; font-size:0.83em; color:var(--muted);">
+            Anonymous ID: <strong id="thankYouResponseId" style="color:var(--text); word-break:break-all;"></strong>
+          </div>
+
+          <p style="color:var(--muted); font-size:0.88em;">You may close this tab now. Every response counts.</p>
         </div>
       </section>
 
@@ -1275,13 +1394,13 @@
     const PHQ_ITEMS = [
       "Little interest or pleasure in doing things",
       "Feeling down, depressed, or hopeless",
-      "Trouble falling/staying asleep, or sleeping too much",
-      "Feeling tired or having little energy",
+      "Trouble falling or staying asleep, or sleeping too much",
+      "Feeling tired or low on energy",
       "Poor appetite or overeating",
-      "Feeling bad about yourself — that you are a failure or have let yourself or your family down",
-      "Trouble concentrating on things (reading, watching TV, studying)",
-      "Moving or speaking so slowly others could have noticed; OR being so fidgety/restless you've been moving around a lot more than usual",
-      "Thoughts that you would be better off dead, or of hurting yourself in some way"
+      "Feeling like a failure, or like you've let yourself or others down",
+      "Trouble concentrating (studying, reading, watching something)",
+      "Moving noticeably slower than usual — OR feeling unusually restless",
+      "Thoughts that life isn't worth living, or of harming yourself"
     ];
 
     const GAD_ITEMS = [
@@ -1294,7 +1413,7 @@
       "Feeling afraid, as if something awful might happen"
     ];
 
-    const FREQ4_LABELS = ["Not at all", "Several days", "More than half the days", "Nearly every day"];
+    const FREQ4_LABELS = ["Not at all", "A few days", "More than half the days", "Almost every day"];
 
     // ============================================================
     // Build dynamic Likert / scale groups
@@ -1333,8 +1452,7 @@
       // Physical activity 0-7
       buildLikert('paGroup', 'physical_activity', [0, 1, 2, 3, 4, 5, 6, 7]);
       // Belonging + financial 1-7
-      buildLikert('belongGroup', 'belonging_score');
-      buildLikert('finGroup', 'financial_strain');
+      // belonging_score and financial_strain are now hardcoded radio cards — no buildLikert needed
 
       // Build PHQ-9 items (Q22..Q30)
       let phqHTML = '';
@@ -1446,13 +1564,35 @@
     // ============================================================
     // Step navigation
     // ============================================================
-    function showStep(n) {
-      document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+    let animating = false;
+
+    function showStep(n, direction = 'forward') {
+      if (animating) return;
+      animating = true;
+
+      const current = document.querySelector('.step.active');
+      if (current) {
+        current.classList.remove('active');
+      }
+
       const next = document.querySelector(`.step[data-step="${n}"]`);
-      if (next) next.classList.add('active');
+      if (next) {
+        next.classList.add('active');
+        next.style.animation = 'none';
+        next.offsetHeight; // force reflow
+        next.style.animation = '';
+      }
+
       currentStep = n;
       updateProgressBar();
       window.scrollTo({ top: 0, behavior: 'smooth' });
+
+      // Show milestone toast when entering a new section
+      if (n > 0 && STEP_TOASTS && STEP_TOASTS[n]) {
+        setTimeout(() => showToast(STEP_TOASTS[n]), 400);
+      }
+
+      setTimeout(() => { animating = false; }, 350);
     }
 
     function nextStep() {
@@ -1466,14 +1606,195 @@
       showStep(currentStep - 1);
     }
 
+    // ── Section color themes ─────────────────────────────────────
+    const STEP_THEMES = {
+      0:  { accent: '#0284C7', grad1: '#F0F9FF', grad2: '#E0F2FE' },
+      1:  { accent: '#0891B2', grad1: '#ECFEFF', grad2: '#CFFAFE' },
+      2:  { accent: '#0369A1', grad1: '#F0F9FF', grad2: '#BAE6FD' },
+      3:  { accent: '#059669', grad1: '#ECFDF5', grad2: '#D1FAE5' },
+      4:  { accent: '#D97706', grad1: '#FFFBEB', grad2: '#FEF3C7' },
+      5:  { accent: '#E11D48', grad1: '#FFF1F2', grad2: '#FFE4E6' },
+      6:  { accent: '#0D9488', grad1: '#F0FDFA', grad2: '#CCFBF1' },
+      7:  { accent: '#2563EB', grad1: '#EFF6FF', grad2: '#DBEAFE' },
+      8:  { accent: '#0284C7', grad1: '#F0F9FF', grad2: '#BAE6FD' },
+      9:  { accent: '#EA580C', grad1: '#FFF7ED', grad2: '#FFEDD5' },
+      10: { accent: '#16A34A', grad1: '#F0FDF4', grad2: '#DCFCE7' },
+    };
+
+    // ── Toast notifications ──────────────────────────────────────
+    const STEP_TOASTS = {
+      2: '✅ Basics done! Now your academics.',
+      3: '📚 Academic section complete!',
+      4: '😴 Halfway there — keep going!',
+      5: '💪 Great job! Almost through.',
+      6: '🌿 Section 5 done!',
+      7: '🩺 Health section done!',
+      8: '💭 Wellbeing done — 1 more set!',
+      9: '🎉 Last section! You got this!',
+    };
+
+    let toastTimer;
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      if (!t) return;
+      t.textContent = msg;
+      t.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
+    }
+
     function updateProgressBar() {
-      const pct = (currentStep / (totalSteps - 1)) * 100;
+      const pct = Math.round((currentStep / (totalSteps - 1)) * 100);
       document.getElementById('progressBar').style.width = pct + '%';
+      const pctEl = document.getElementById('progressPct');
+      if (pctEl) pctEl.textContent = currentStep === 0 ? '' : pct + '% complete';
+
+      // Apply section color theme
+      const theme = STEP_THEMES[currentStep] || STEP_THEMES[0];
+      document.documentElement.style.setProperty('--step-accent', theme.accent);
+      document.documentElement.style.setProperty('--primary', theme.accent);
+      document.documentElement.style.setProperty('--bg-grad-1', theme.grad1);
+      document.documentElement.style.setProperty('--bg-grad-2', theme.grad2);
+    }
+
+    // Auto-advance when a radio card is selected on steps that have only radio groups
+    const AUTO_ADVANCE_STEPS = new Set([1, 2, 4, 5, 6]);
+    document.addEventListener('change', (e) => {
+      if (e.target.type !== 'radio') return;
+      if (!AUTO_ADVANCE_STEPS.has(currentStep)) return;
+      const stepEl = document.querySelector(`.step[data-step="${currentStep}"]`);
+      if (!stepEl) return;
+      // Check all required radio groups in the step are answered
+      const requiredNames = new Set(
+        [...stepEl.querySelectorAll('input[type="radio"][required]')].map(r => r.name)
+      );
+      const allAnswered = [...requiredNames].every(name =>
+        stepEl.querySelector(`input[name="${name}"]:checked`)
+      );
+      if (allAnswered) {
+        setTimeout(() => nextStep(), 420); // short delay so user sees their selection
+      }
+    });
+
+    // ============================================================
+    // Skip optional question
+    // ============================================================
+    function toggleOtherField() {
+      const sel = document.getElementById('fieldSelect');
+      const inp = document.getElementById('fieldOtherInput');
+      if (sel && inp) {
+        inp.style.display = sel.value === 'Other' ? 'block' : 'none';
+        inp.required = sel.value === 'Other';
+      }
+    }
+
+    function skipQuestion(fieldName, defaultValue) {
+      // Set the default value silently
+      data[fieldName] = defaultValue;
+      // Visually tick the matching radio so validation passes
+      const match = document.querySelector(`input[name="${fieldName}"][value="${defaultValue}"]`);
+      if (match) {
+        match.checked = true;
+        match.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+    }
+
+    // ============================================================
+    // Confetti engine (pure JS, no library)
+    // ============================================================
+    function launchConfetti() {
+      const canvas = document.getElementById('confetti-canvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      canvas.width  = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      // Bright, non-purple palette
+      const colors = ['#0EA5E9','#10B981','#F59E0B','#EF4444','#F97316','#06B6D4','#34D399','#FBBF24'];
+      const pieces = Array.from({ length: 160 }, () => ({
+        x: Math.random() * canvas.width,
+        y: -20 - Math.random() * 120,
+        w: 8 + Math.random() * 10,   // rectangle width
+        h: 4 + Math.random() * 5,    // rectangle height
+        vx: (Math.random() - 0.5) * 1.5,  // horizontal drift
+        vy: 2.5 + Math.random() * 3,       // fall speed
+        angle: Math.random() * Math.PI * 2,
+        spin: (Math.random() - 0.5) * 0.18,
+        color: colors[Math.floor(Math.random() * colors.length)],
+      }));
+
+      let frame;
+      function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        pieces.forEach(p => {
+          p.angle += p.spin;
+          p.x += p.vx;
+          p.y += p.vy;
+          ctx.save();
+          ctx.translate(p.x, p.y);
+          ctx.rotate(p.angle);
+          ctx.fillStyle = p.color;
+          ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+          ctx.restore();
+        });
+        if (pieces.some(p => p.y < canvas.height + 20)) {
+          frame = requestAnimationFrame(draw);
+        } else {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+      }
+      frame = requestAnimationFrame(draw);
+      setTimeout(() => { cancelAnimationFrame(frame); ctx.clearRect(0,0,canvas.width,canvas.height); }, 5000);
+    }
+
+    // ============================================================
+    // Profile card reveal on thank-you screen
+    // ============================================================
+    function revealProfileCard(band, topFeatures) {
+      const badge    = document.getElementById('profileBadge');
+      const label    = document.getElementById('profileLabel');
+      const fill     = document.getElementById('meterFill');
+      const subtext  = document.getElementById('meterSubtext');
+      const tip      = document.getElementById('profileTip');
+      if (!badge) return;
+
+      const config = {
+        High:   { cls:'high',   pct:'78%', label:'High Stress',   sub:'Your scores suggest significant stress load.',
+                  tip:'The biggest driver of your stress appears to be your wellbeing scores. Try one small habit this week: 7 hrs sleep, a 20-min walk, or talking to someone you trust.' },
+        Medium: { cls:'medium', pct:'48%', label:'Moderate Stress', sub:'Some stress signals detected — manageable with small changes.',
+                  tip:'You\'re in a manageable range! Small tweaks to sleep or exercise can make a big difference. StressEQ\'s AI Coach will suggest personalised actions when it launches.' },
+        Low:    { cls:'low',    pct:'22%', label:'Low Stress',      sub:'You\'re doing well — your scores look healthy!',
+                  tip:'Keep it up! Low stress is linked to better performance and wellbeing. Share StressEQ with friends who might need a check-in.' },
+      };
+
+      const c = config[band] || config['Medium'];
+      badge.textContent = c.label;
+      badge.className   = `level-badge ${c.cls}`;
+      label.textContent = c.label;
+      subtext.textContent = c.sub;
+      tip.textContent     = c.tip;
+      fill.className      = `stress-meter-fill meter-${c.cls}`;
+
+      // Animate meter after brief delay
+      setTimeout(() => { fill.style.width = c.pct; }, 300);
+    }
+
+    // ============================================================
+    // Share survey link
+    // ============================================================
+    function shareLink() {
+      const url = window.location.href.split('?')[0];
+      if (navigator.share) {
+        navigator.share({ title: 'StressEQ Student Survey', url });
+      } else {
+        navigator.clipboard.writeText(url).then(() => showToast('Link copied to clipboard!'));
+      }
     }
 
     // ============================================================
     // Validation
     // ============================================================
+
     function validateStep(step) {
       const stepEl = document.querySelector(`.step[data-step="${step}"]`);
       if (!stepEl) return true;
@@ -1613,11 +1934,14 @@
         const v = parseInt(data[`gad${i}`] || 1);
         gad += isNaN(v) ? 0 : (v - 1);
       }
-      // Stress band (Cohen-style)
+      // Stress band — matches build_v5_dataset.py exactly (Kroenke 2001, Spitzer 2006)
+      // High     : PHQ-9 ≥ 10  OR  GAD-7 ≥ 10   → clinical threshold
+      // Medium   : PHQ-9 ≥  5  OR  GAD-7 ≥  5   → subclinical
+      // Low      : everything else                → minimal symptoms
       let band;
-      if (phq >= 10 || gad >= 10) band = 'High';
-      else if (phq >= 5 || gad >= 5) band = 'Medium';
-      else band = 'Low';
+      if      (phq >= 10 || gad >= 10) band = 'High';
+      else if (phq >=  5 || gad >=  5) band = 'Medium';
+      else                              band = 'Low';
 
       data.phq9_score = phq;
       data.gad7_score = gad;
@@ -1629,11 +1953,9 @@
       const drugUsed = data.drugs === 'Yes' ? 1 : 0;
       data.substance_use_score = tobaccoUsed + alcoholUsed + drugUsed;
 
-      // Compute chronic_illness tier
-      const sev = [...document.querySelectorAll('input[name="chronic_sev"]:checked')].length;
-      const mod = [...document.querySelectorAll('input[name="chronic_mod"]:checked')].length;
-      const mild = [...document.querySelectorAll('input[name="chronic_mild"]:checked')].length;
-      data.chronic_illness_tier = sev > 0 ? 3 : mod > 0 ? 2 : mild > 0 ? 1 : 0;
+      // Compute chronic_illness tier — now a direct radio value 0-3
+      const chrEl = document.querySelector('input[name="chronic_illness_tier"]:checked');
+      data.chronic_illness_tier = chrEl ? parseInt(chrEl.value) : 0;
 
       // BMI from canonical values
       data.bmi = +(data.weight_kg / Math.pow(data.height_cm / 100, 2)).toFixed(1);
@@ -1647,6 +1969,10 @@
       showStep(10);
       const ridEl = document.getElementById('thankYouResponseId');
       if (ridEl) ridEl.textContent = data.response_id;
+
+      // 🎉 Gamification reward
+      launchConfetti();
+      setTimeout(() => revealProfileCard(data.stress_level, data.top_features), 500);
 
       // POST to Google Apps Script. Using application/x-www-form-urlencoded
       // lets the script receive the JSON without triggering a CORS preflight
